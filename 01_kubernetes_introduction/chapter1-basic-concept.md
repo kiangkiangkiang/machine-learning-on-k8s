@@ -25,14 +25,16 @@ K8s（Kubernetes）是一個開源平台，用於**自動化部署**、**管理�
 
 #### 因此，在高流量高負荷或是大型服務集群的情況下，K8s 能有更高的擴展性和可靠性和便利性。
 
-## K8s 基本框架與概念
+## K8s 基本概念
 
-### 框架簡介 (Cluster/Master/Worker)
+### 基礎架構 (Cluster/Control Plane/Node)
 
-在 K8s 中，**Cluster (集群)** 可以視為一個完整的服務單位，也就是由 Master 跟 Worker 所組成的一堆的機器。可以想像這些機器會**共同處理一個服務**，例如在 Chatbot 中，可能就會有很多台機器 (worker node) 負責模型推論，但在高流量的情況下，要把當前輸入的對話傳給哪台機器去推論，就是 master node 要去處理的問題，而包含 DB, Web APP 等，也都會是 worker node 所服務的 container，因此一個 Cluster 可以視為一大堆機器共同處理一個服務。
+在 K8s 中，**Cluster (集群)** 可以視為一個完整的服務單位，也就是由 Control Plane 跟 Node 所組成的一堆的機器。可以想像這些機器會**共同處理一個服務**，例如在 Chatbot 中，可能就會有很多台機器 (Worker Node) 負責模型推論，但在高流量的情況下，要把當前輸入的對話傳給哪台機器去推論，就是 Control Plane Node 要去處理的問題，而包含 DB, Web APP 等，也都會是 Worker Node 所服務的 container，因此一個 Cluster 可以視為一大堆機器共同處理一個服務。
 
-- **Node**: 可以視為一台機器，例如你正在使用的 Mac, Windows, Linux, AWS EC2, GCP Compute Engine 等。擁有一個**獨立的硬體配置資源**。Node 又可以依照在做的任務分成 Master Node, Worker Node。
-- **Master Node**: 想像成人體的大腦，負責**發號命令**。
+*其中，Control Plane 可以比擬成 Master。只是 Control Plane 更強調管控的「行為」或「邏輯」，Master 強調管控「機器」，因此也可以說「這些 Master Node 就是我的 Control Plane」，而當只有一台機器做 Control Plane 時，基本上兩者是一致的，不過要注意官方現今以減少使用 Master 這樣的詞彙了。*
+
+- **Node**: 可以視為一台機器，例如你正在使用的 Mac, Windows, Linux, AWS EC2, GCP Compute Engine 等。擁有一個**獨立的硬體配置資源**。Node 又可以依照在做的任務分成 Control Plane Node, Worker Node。
+- **Control Plane Node**: 想像成人體的大腦，負責**發號命令**。
 - **Worker Node**: **處理真正的服務內容**，例如 DB, APP, Inference Endpoint, Training Endpoint，一個 Worker Node 通常可能會同時存在很多個應用 (Pod)，因此會被配置較多的運算資源。
 
 **注意：Worker Node 就是*計算資源*，可以想像成一個完全空的機器，等待被使用，在 K8s 框架下，不需要手動進入 Worker Node 內部開發，只需要在把我們開發好的 image 寫入配置檔，後續 K8s 就會自動把這個應用程式分配進 Worker Node。**
@@ -62,11 +64,3 @@ K8s（Kubernetes）是一個開源平台，用於**自動化部署**、**管理�
 3.  爬蟲服務與前處理服務，定期上網撈資料 (CronJob)，並進行前處理後存入 DB。並且觸發模型訓練服務 (Event)。
 
 在 Pods 建立好後（在某台機器上把訓練程式寫好後打包成 image，之後透過 yaml file 使用），K8s 便會自動把這些 Pods 分配到有資源的 Worker Nodes。以上圖來說，訓練的 Pod 可能就在獨立一個 Node（資源需求高），其他兩個 Pod 可能被自動分配在同一個 Node 內。
-
-
-
-
-
-
-
-
