@@ -1,6 +1,6 @@
 ## K8s Component
 
-有別於[上一章](chapter1-basic-concept.md)從 K8s 應用情境切入介紹，本章將更著重在實際內部元件的概述。包含介紹上一章提到的 Control Plane、Node 等結構中，內部有什麼組成？彼此間資料如何傳遞？而在了解這些細節後，未來在實作上會更清楚如何建立一個 Control Plane 以及 Node。
+有別於[上一章](chapter1-basic-concept.md)從 K8s 應用情境切入介紹，本章將更著重在實際內部元件的概述。包含介紹上一章提到的 Control Plane、Node 等結構中，內部有什麼組成？彼此間資訊如何傳遞？而在了解這些細節後，未來在實作上會更清楚如何建立一個 Control Plane 以及 Node。
 
 以下為基礎 K8s 架構範例（可能會因為不同服務建置需求而有不同），後續將透過此架構圖進一步說明內部細節。
 
@@ -101,27 +101,12 @@ Kubernetes 是為了編排和管理容器化服務而設計的，因此在 Kuber
 
 #### kube-proxy
 
+分配在每個 Node 上的 Component，主要就是處理流量問題。
 
+例如，某個服務在 Node 1 上的 Pod 3 和 Pod 4（兩個副本），而外部使用者要怎麼打到這兩個服務？
 
-## K8s Initialization Workflow
+實際上我們會從 K8s 上新建一個 `Services`，用此來宣告哪一個 Node Port 會導向哪一個我們起的 App Port，以上述的例子來說，我們有一個服務開放 30000 port，且複製了兩份，而 `Services` 則需要宣告 Node Port 30000 導向上述服務的 30000 Port（注意：實際上並不會指定 Node，因為正常來說，此服務會到哪個 Node 是自動分配的，所以我們只需要指定 Node Port 如何導向 App Port 就好），這樣無論未來服務被分配到哪個 Node，流量都能正常打入。
 
-### Workflow
+而集群內部運行則是，kube-proxy 會持續監聽 kube-apiserver 的 Services，當有新的 Services 時，kube-proxy 會向 kube-apiserver 所要 Services 相關資訊，自動根據我們定義好的配置，自動更新到 kube-proxy 內的 iptables 中。
 
-### Kubernetes Manifest
-
-## K8s Command
-
-### kubectl
-
-### kubeadm
-
-next study component and command
-
-
-- Kubernetes Manifest: 組態文件，K8s 起服務主要透過此文件來管控，通常是 YAML 格式，基本可以想像成跟 Dockerfile 或 Docker-Compose 差不多，都是透過宣告的方式來控制服務間的連結以及服務本身的規格，如下：
-
-![alt text](image.png)
-
-
-
-https://www.omniwaresoft.com.tw/product-news/k8s-introduction/
+因此我們只要打某一個 Node IP + Port，實際上就是去訪問那個 Node 的 kube-proxy，接著 kube-proxy 會藉由 iptables，將此流量導向正確的 App（在 Services 設定好的），無論此 App 有沒有在該 Node 上，kube-proxy 都能正確傳導。
