@@ -1,4 +1,4 @@
-## K8s Component
+# K8s Component
 
 有別於[上一章](chapter1-basic-concept.md)從 K8s 應用情境切入介紹，本章將更著重在實際內部元件的概述。包含介紹上一章提到的 Control Plane、Node 等結構中，內部有什麼組成？彼此間資訊如何傳遞？而在了解這些細節後，未來在實作上會更清楚如何建立一個 Control Plane 以及 Node。
 
@@ -6,7 +6,7 @@
 
 ![alt text](image-1.png)
 
-### 1. Control Plane
+## 1. Control Plane
 
 Control Plane 內部包含多個元件，每個元間之間透過 kube-apiserver 當作中心點相互溝通，透過以下「新建服務」的例子，來快速瞭解彼此間所扮演的角色以及溝通模式：
 
@@ -20,7 +20,7 @@ Control Plane 內部包含多個元件，每個元間之間透過 kube-apiserver
 5. 此時，Scheduler 因為持續監聽著 kube-apiserver 的某些事件，因此發現「有新的服務未被部署」時，觸發了 Scheduler 的程式，Scheduler 會主動打到 kube-apiserver 要這些未被部署的服務的資訊（由於 controller-manager 已經將服務都標記上要求的硬體，因此 Scheduler 只需要計算集群內每個 Node 擁有的資源，根據特定策略做分配即可）。
 6. 最終 Scheduler 分配完成後，會告訴 kube-apiserver，將這些服務所分配到的 Node 等資訊，寫入 etcd。
 
-#### kube-apiserver
+### kube-apiserver
 
 由上述範例可知，kube-apiserver 實際上就是在做以下工作：
 
@@ -32,7 +32,7 @@ Control Plane 內部包含多個元件，每個元間之間透過 kube-apiserver
 
 舉例來說，kube-apiserver 類似學校的教務處，教務處會把學校的一些資訊放到佈告欄上，每個班級要告訴教務處說「我需要知道哪些資訊」，後續只要那些資訊跟某些班級有相關，教務處就會派人將這些資訊去該班級宣達。後續要如何處理該訊息，就是該班級內部自己決定的事情。
 
-#### etcd
+### etcd
 
 分散式系統內最主要的狀態儲存庫，主要儲存以下資訊整個集群的資訊，以及服務相對應的配置資訊，或是每個 Pod 的狀態等資訊。
 
@@ -42,13 +42,13 @@ Control Plane 內部包含多個元件，每個元間之間透過 kube-apiserver
 
 k8s 是一個分散式系統，而當在分散式系統發現有個機器故障了，勢必得修復它，但這台機器是做什麼用，處理哪些任務的，正常情況下沒人知道，所以要有個地方存這些資訊，並且要整個集群內都統一，這樣才不會有的人說要修復成 A 狀態，有的說要修復成 B 狀態，因此 etcd 就是集群內部資訊的統一儲存庫，無論是要更新、修復等，都可以藉由 etcd 來取得最新資訊。
 
-#### scheduler
+### scheduler
 
 scheduler 主要就是用於調度與排程，最基本的就是當有新建立的 Pod 且未指定 Node 運行時，scheduler 就會根據硬體條件、資料位置、工作負載等各種資訊，將 Pod 調到最適當的 Node。
 
 因此 scheduler 會持續監聽 kube-apiserver (watch)，可以想像成 scheduler 向 apiserver 訂閱了某個特定事件（例如狀態更新的通知），因此當 kube-apiserver 有此狀態更新時，kube-apiserver 會主動向 scheduler 通知，接著 scheduler 再向 apiserver 索要特定狀態資訊，例如當發現此特定狀態資訊是有新建立的 Pod 且未指定 Node 運行時，scheduler 就會向 apiserver 要求此 Pod 資訊。最終根據 scheduler 內部演算法進行 Node 調配。
 
-#### controller-manager
+### controller-manager
 
 管理整個集群的主要邏輯層。
 
@@ -65,13 +65,13 @@ scheduler 主要就是用於調度與排程，最基本的就是當有新建立�
 
 所以可以想像一個 Control Plane 中，有很多個 controller，各自監聽各自想要的資源或任務，並且規劃一系列執行**意圖**，把這些執行意圖交給 kube-apiserver，讓 kube-apiserver 統一發送到各個 Node 的 kubelet 執行（注意：controller 只是告知 apiserver 想要新增或修改的 Pod 訊息，並不是真正的新增修改的指令）。
 
-#### cloud-controller-manager (Optional)
+### cloud-controller-manager (Optional)
 
 和雲平台溝通的節點，主要是 K8s 服務如果有用到雲端資源時，會透過 Cloud Controller Manager 來管控使用雲端的服務（沒用到就不用這個節點）。例如，假設我們建立一個 K8s 服務，其中會使用 AWS LoadBalancer，則就會在此節點管控兩者之間的交互。
 
-### Node
+## Node
 
-#### kubelet
+### kubelet
 
 負責管理每個 Node。
 
@@ -82,7 +82,7 @@ scheduler 主要就是用於調度與排程，最基本的就是當有新建立�
 通常如果是自動建置集群的話（kubeadm），正常情況下不需要到每個 Node 上跑 kubelet 指令，只有在手動建置時，或是在除錯時，需要真的進入該 Node 進行錯誤盤查。
 
 
-#### container runtime
+### container runtime
 
 Kubernetes 是為了編排和管理容器化服務而設計的，因此在 Kubernetes 上運行的每個服務都需要事先被打包成 container，反之，如果你的服務已經是一個 container，那麼可以直接將此 image 配置到 K8s 環境中。
 
@@ -99,7 +99,7 @@ Kubernetes 是為了編排和管理容器化服務而設計的，因此在 Kuber
 
 而這些 container runtime 都是 K8s 原生支援的，也就是這些都有開放 container runtime interface (CRI)，kubelet 便是透過此管道向 內部的 container 進行管控，因此安裝完後，只需要配置好其中的設定檔（確保 CRI 有正確啟用），就可以無痛整進 K8s 環境內。
 
-#### kube-proxy
+### kube-proxy
 
 分配在每個 Node 上的 Component，主要就是處理流量問題。
 
