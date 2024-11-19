@@ -110,3 +110,5 @@ Kubernetes 是為了編排和管理容器化服務而設計的，因此在 Kuber
 而集群內部運行則是，kube-proxy 會持續監聽 kube-apiserver 的 Services，當有新的 Services 時，kube-proxy 會向 kube-apiserver 所要 Services 相關資訊，自動根據我們定義好的配置，自動更新到 kube-proxy 內的 iptables 中。
 
 因此我們只要打某一個 Node IP + Port，實際上就是去訪問那個 Node 的 kube-proxy，接著 kube-proxy 會藉由 iptables，將此流量導向正確的 App（在 Services 設定好的），無論此 App 有沒有在該 Node 上，kube-proxy 都能正確傳導。
+
+所以每個 Node 上的 kube-proxy 和 iptables 就是流量傳導的關鍵元件。
