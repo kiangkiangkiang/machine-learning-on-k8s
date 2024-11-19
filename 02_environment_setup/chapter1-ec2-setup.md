@@ -42,7 +42,7 @@ Key Pairs 就是連進 EC2 的鑰匙，手上要有相對應的鑰匙才能連�
 
 #### Network & Storage
 
-Network 的部分主要需要確保三台機器彼此可以正常溝通，K8s 官方有提供每個節點需要對外的 Port 以及其用途：
+Network 的部分主要需要確保三台機器彼此可以正常溝通，K8s [官方](https://kubernetes.io/docs/reference/networking/ports-and-protocols/#control-plane)有提供每個節點需要對外的 Port 以及其用途：
 
 ![alt text](image.png)
 
