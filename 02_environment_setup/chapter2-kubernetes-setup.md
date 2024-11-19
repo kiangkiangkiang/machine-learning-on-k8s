@@ -68,8 +68,10 @@ sudo swapoff -a
 
 `swapoff` 就是禁用特定的儲存區塊，`-a` 的 a 就是 all，也就是所有交換區都禁用。
 
+#### 2. Module Setup
 
-#### 2. Network Setup
+
+#### 3. Network Setup
 
 由[上一章](/01_kubernetes_introduction/chapter2-component-details.md)可以知道，在整個集群的網路，基本上是依靠`kube-proxy`動態更新`iptables`，實際上的網路傳導就是由更新好的`iptables`進行過濾。
 
