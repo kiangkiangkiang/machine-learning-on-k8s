@@ -2,6 +2,8 @@
 
 在 [chapter1-ec2-setup](/02_environment_setup/chapter1-ec2-setup.md) 中起好 EC2 後，就可以開始進行 K8s 的集群設定。
 
+照著本篇所有 Code Block 跑，基本上就能起好 K8s Cluster，**注意有些是要進入檔案內部手動修改設定，並不是單純的 Script，且有的是要在 Control Plane 跑，有的是要在 Worker Node 跑**。
+
 ## Command line tool
 
 以下會先介紹三個常見的 command line 工具，每個工具的使用層級不同。
@@ -40,7 +42,7 @@ kubelet 是每個 Worker Node 都有的元件，主要會監聽 kube-apiserver�
 
 安裝和配置 Container Runtime → 安裝 Kubernetes command line tool → 初始化集群 (kubeadm init) → 配置網絡插件 ([CNI](#network-setup)) → 加入 Worker Node。
 
-### Rename host (Optional)
+### Rename host (Optional) (ALL NODE)
 
 目前我們有三台 EC2 機器，但預設情況下，比較難區分哪台機器的任務是什麼，後續在建置可能會困惑。
 
@@ -54,7 +56,7 @@ sudo hostnamectl set-hostname control-plane
 
 ![alt text](image-5.png)
 
-### Preparation Work
+### Preparation Work（ALL NODE）
 
 #### 1. Turn off swap
 
@@ -161,11 +163,62 @@ service containerd status
 
 ![alt text](image-6.png)
 
-### Kubernetes Command Line Tool Installation
+### Kubernetes Command Line Tool Installation (ALL NODE)
+
+以下指令皆按照官方提供步驟進行，若有建置新版本，請遵循[官方指令](https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl)：
 
 
+#### Environment & Key Setup
+
+這裡除了下載基本套件外，還去官方下載 Release Key，為了確保後續我們下載到的 K8s 包，是和官方提供的一致，沒有在傳輸過程被做任何修改。
+
+除此之外，在這裡還把鑰匙配置到系統 (apt) 已知的路徑內，後續我們使用 apt 下載 K8s 相關工具，就會找到路徑內的鑰匙，驗證工具包的完整性。
+
+```sh
+sudo apt-get update
+```
+
+```sh
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+```
+
+```sh
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+```
+
+```sh
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+```
+
+#### Command Line Line Tool Installation
 
 
+```sh
+sudo apt-get update
+```
+
+```sh
+sudo apt-get install -y kubelet kubeadm kubectl
+```
+
+為了確保系統更新時（例如 apt-get update），K8s 工具包不會自動更新，減少不相容錯誤，因此用 `apt-mark hold` 確保版本一致。
+
+```sh
+sudo apt-mark hold kubelet kubeadm kubectl
+```
+
+最後使用以下指令確認是否有成功安裝：
+
+測試 `kubeadm`
+```sh
+kubeadm version
+```
+
+![alt text](image-7.png)
+
+至此，基本套件都安裝完畢，可以開始來建置集群了！
+
+### Cluster Initialization
 
 
 

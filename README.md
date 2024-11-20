@@ -1,4 +1,5 @@
 
+worker-node-1 安裝好了 Container Runtime（其他都還沒）
 
 # Reference
 - https://www.omniwaresoft.com.tw/product-news/k8s-introduction/
