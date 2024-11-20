@@ -8,6 +8,8 @@
 3. 各種常見指令
 
 
+訓練一個 LLM 
+
 Kubernetes Manifest: 組態文件，K8s 起服務主要透過此文件來管控，通常是 YAML 格式，基本可以想像成跟 Dockerfile 或 Docker-Compose 差不多，都是透過宣告的方式來控制服務間的連結以及服務本身的規格，如下：
 
 ![alt text](image.png)
