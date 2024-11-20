@@ -216,9 +216,21 @@ kubeadm version
 
 ![alt text](image-7.png)
 
-至此，基本套件都安裝完畢，可以開始來建置集群了！
 
 ### Cluster Initialization
+
+至此，基本套件都安裝完畢，可以開始來建置集群了！
+
+而在此之前的所有指令，都是建置在**每個節點**，因此每個節點都要跑一次建置流程，而之後開始的指令，會依照各個節點需求而有不同！
+
+以下皆參考[官方文件](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/)建置流程。
+
+#### Control Plane Setup (CONTROL PLANE NODE)
+
+```sh
+sudo kubeadm init
+```
+
 
 
 
@@ -228,7 +240,7 @@ kubeadm version
 
 那實際上 iptables 內管理每個 Pod 的 IP，以及他們是走哪條網路，這些是怎麼來的？
 
-在 K8s 內部的網路通信，依靠 CNI (Container Network Interface) 的規範進行，他負責管理和配置容器 (Pod) 的網絡接口，使得 Pod 能夠在 Cluster 中通信。也就是，**要先有 CNI 提供好的網路基建，把網路建立起來，分配給每個 Pod IP，後續 kube-proxy 才能藉由這個網路基建，動態更新 iptables。**因此，沒有 CNI，相當於 Cluster 完全不能通信，也建立不起來。
+在 K8s 內部的網路通信，依靠 CNI (Container Network Interface) 的規範進行，他負責管理和配置容器 (Pod) 的網絡接口，使得 Pod 能夠在 Cluster 中通信。也就是，**要先有 CNI 提供好的網路基建，把網路建立起來，分配給每個 Pod IP，後續 kube-proxy 才能藉由這個網路基建，動態更新 iptables。** 因此，沒有 CNI，相當於 Cluster 完全不能通信，也建立不起來。
 
 常見實作 CNI 規範的套件，如下表：
 
