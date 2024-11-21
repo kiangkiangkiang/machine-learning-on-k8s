@@ -285,5 +285,34 @@ kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/we
 包含 `coredns-*` 和 `wave-net` 等網路基礎設施都建立好了！
 
 
+### Join Worker Nodes (CONTROL PLANE & WORKER NODE)
 
+接著可以透過[初始化集群](#cluster-initialization)時給的 Token 來加入 Worker Node，若沒有將 Token 記下，可以跑以下指令來建立：
 
+**CONTROL PLANE**
+```sh
+kubeadm token create --print-join-command
+```
+
+**WORKER NODE**
+生成好的指令如下（把自己產生的指令在 Worker Node 執行）：
+```sh
+sudo kubeadm join {YOUR_IP}:6443 --token {TOKEN} --discovery-token-ca-cert-hash {HASH}
+```
+
+正常情況下，我們在兩台 EC2 都用 `kubeadm join` 把 Worker Node 加進去，最後回到 Control Plane，使用以下指令，來看是否正確加進來：
+
+**CONTROL PLANE**
+```sh
+kubeadm get nodes
+```
+![alt text](image-11.png)
+
+也可以回到 Worker Node 看是否正常運作
+**WORKER NODE**
+```sh
+service kubelet status
+```
+![alt text](image-12.png)
+
+至此，K8s 集群已經順利啟動成功，未來有新的工作節點要加入的話，把 Container Runtime 和 Command Line Tool 裝好，就可以用同樣的方式加入，呼應[第一章](/01_kubernetes_introduction/chapter1-basic-concept.md)提到的概念，K8s 就是自動化管理 Container 的工具，我們如今已經把環境架好，未來只要透過配置檔，就可以自動把 Container 推送到集群內部執行了，另外如果是需要耗費龐大資源的服務，也可以在基本框架不變下，新增更多 Worker Node 來解決。
