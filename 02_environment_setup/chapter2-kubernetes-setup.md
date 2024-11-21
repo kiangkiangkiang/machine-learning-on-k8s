@@ -227,28 +227,62 @@ kubeadm version
 
 #### Control Plane Setup (CONTROL PLANE NODE)
 
+初始化 Cluster
+
 ```sh
 sudo kubeadm init
 ```
 
+隨後會 output 出一大堆資訊，依照官方步驟，也須執行以下命令：
 
 
+```sh
+mkdir -p $HOME/.kube                                                                                                            
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config                                                                        
+sudo chown $(id -u):$(id -g) $HOME/.kube/config  
+```
 
-### Network Setup
+最後保留 `kubectl join` 的部分，未來將 Worker Node 新增進 Cluster 內，會需要使用此指令。
 
-由[上一章](/01_kubernetes_introduction/chapter2-component-details.md)可以知道，在整個集群的網路，基本上是依靠`kube-proxy`動態更新`iptables`，實際上的網路傳導就是由更新好的`iptables`進行過濾。
+設定好後，可以用以下指令，才看 Cluster 內的 Pod 狀況：
 
-那實際上 iptables 內管理每個 Pod 的 IP，以及他們是走哪條網路，這些是怎麼來的？
+```sh
+kubectl get pod -A
+```
 
-在 K8s 內部的網路通信，依靠 CNI (Container Network Interface) 的規範進行，他負責管理和配置容器 (Pod) 的網絡接口，使得 Pod 能夠在 Cluster 中通信。也就是，**要先有 CNI 提供好的網路基建，把網路建立起來，分配給每個 Pod IP，後續 kube-proxy 才能藉由這個網路基建，動態更新 iptables。** 因此，沒有 CNI，相當於 Cluster 完全不能通信，也建立不起來。
+![alt text](image-8.png)
 
-常見實作 CNI 規範的套件，如下表：
+#### Network Setup
+
+此時，可以發現大部分名稱都已經在[上一章](/01_kubernetes_introduction/chapter2-component-details.md)介紹過，唯有 `coredns-*` 還沒提到，而這個元件的工作就是 Cluster 內部的 DNS 系統，想像有一個巨大的 Dict（名稱 -> IP），當 Cluster 內部在訪問某個服務 `foo` 時，實際上該流量會先導到 DNS 詢問 `foo` 的 IP 位置，有了 IP 後就透過先前提到的 `iptables` 將這些流量轉發到對應的服務內。
+
+而由於 Cluster 只建立好集群的殼，內部網路還沒實作完畢，DNS 系統無法建立成功，因此 `coredns-*` 一直處於 Pending 的狀態。而在 K8s 內部的網路通信，主要依靠 CNI (Container Network Interface) 的規範進行，他負責管理和配置容器 (Pod) 的網絡接口，使得 Pod 能夠在 Cluster 中通信。也就是，**要先有 CNI 提供好的網路基建，把網路建立起來，分配給每個 Pod IP，後續 kube-proxy 才能藉由這個網路基建，動態更新 iptables。** 因此，沒有 CNI，相當於 Cluster 完全不能通信，也建立不起來。
+
+因此這邊要先為 Cluster 安裝合適的網路套件，其中常見實作 CNI 規範的套件，如下表：
 
 | CNI 插件  | 是否需要配置 `net.bridge.bridge-nf-call-iptables` | 支持的網絡策略 (NetworkPolicy) | 加密支持   | 使用的網絡技術            |
 |-----------|--------------------------------------------------|-------------------------------|-----------|--------------------------|
 | Calico    | 否                                                | 是                             | 選擇性加密 | 原生路由/BGP              |
 | Flannel   | 視後端而定（如 VXLAN 通常需要）                     | 否（需與其他插件配合如 Calico）  | 否         | Overlay (VXLAN 等)        |
 | Weave Net | 是                                                | 是                             | 是         | Overlay 網絡 (Weave 網狀) |
+
+
+在這我們用 **Weave Net** 建構 Cluster 的內部網路，而 **Weave Net** 是使用 [UDP 協定](https://zh.wikipedia.org/zh-tw/%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%8A%A5%E5%8D%8F%E8%AE%AE)來進行 Node 間的構通，因此要開放特定的 Port，確保 Node 間能以 UDP 協定正常溝通。[這裡](https://github.com/weaveworks/weave/blob/master/site/kubernetes/kube-addon.md#network-policy)有 **Weave Net** 實作在 K8s 上的詳細說明可以參考。
+
+更新後的 Security Group 如下（Control Plane & Worker Node 都要更新）
+
+![alt text](image-9.png)
+
+最後，根據官方介紹，我們使用以下指令配置 Cluster 內部網路：
+
+```sh
+kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
+```
+
+成功如下：
+![alt text](image-10.png)
+
+包含 `coredns-*` 和 `wave-net` 等網路基礎設施都建立好了！
 
 
 
