@@ -1,6 +1,6 @@
 # K8s Cluster on AWS EC2
 
-在 [chapter1-ec2-setup](/02_environment_setup/chapter1-ec2-setup.md) 中起好 EC2 後，就可以開始進行 K8s 的集群設定。
+在 [chapter3-ec2-setup](/02_environment_setup/chapter3-ec2-setup.md) 中起好 EC2 後，就可以開始進行 K8s 的集群設定。
 
 照著本篇所有 Code Block 跑，基本上就能起好 K8s Cluster，**注意有些是要進入檔案內部手動修改設定，並不是單純的 Script，且有的是要在 Control Plane 跑，有的是要在 Worker Node 跑**。
 
@@ -316,3 +316,5 @@ service kubelet status
 ![alt text](image-12.png)
 
 至此，K8s 集群已經順利啟動成功，未來有新的工作節點要加入的話，把 Container Runtime 和 Command Line Tool 裝好，就可以用同樣的方式加入，呼應[第一章](/01_kubernetes_introduction/chapter1-basic-concept.md)提到的概念，K8s 就是自動化管理 Container 的工具，我們如今已經把環境架好，未來只要透過配置檔，就可以自動把 Container 推送到集群內部執行了，另外如果是需要耗費龐大資源的服務，也可以在基本框架不變下，新增更多 Worker Node 來解決。
+
+而實際上，要怎麼將服務推送到集群內部，在[下一章](/03_LLM_full_finetune_on_k8s/)會透過 distributed training for LLM 為案例，來介紹要怎麼利用多個 Worker Node，平行化訓練一個龐大的語言模型。
