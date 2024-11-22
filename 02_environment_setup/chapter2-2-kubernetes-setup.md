@@ -76,7 +76,7 @@ sudo swapoff -a
 
 #### 2. Modules Setup
 
-在集群網路架構實作上，這裡預計使用 `Weave` 的 [CNI 套件]((#network-setup))，而為了讓每個流量能正常透過 `iptables` 過濾（也就是正常參照 K8s Framework 運行），因此安裝 `br_netfilter` 套件，藉由該套件的設定，讓每個網段的流量，經由網橋通過時，能正常轉發過去：
+在集群網路架構實作上，這裡預計使用 `Weave` 的 [CNI 套件](#network-setup)，而為了讓每個流量能正常透過 `iptables` 過濾（也就是正常參照 K8s Framework 運行），因此安裝 `br_netfilter` 套件，藉由該套件的設定，讓每個網段的流量，經由網橋通過時，能正常轉發過去：
 
 ```sh
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
