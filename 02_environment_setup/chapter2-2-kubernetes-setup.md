@@ -1,6 +1,6 @@
 # K8s Cluster on AWS EC2
 
-在 [chapter3-ec2-setup](/02_environment_setup/chapter3-ec2-setup.md) 中起好 EC2 後，就可以開始進行 K8s 的集群設定。
+在 [chapter2-1-ec2-setup](/02_environment_setup/chapter2-1-ec2-setup.md) 中起好 EC2 後，就可以開始進行 K8s 的集群設定。
 
 照著本篇所有 Code Block 跑，基本上就能起好 K8s Cluster，**注意有些是要進入檔案內部手動修改設定，並不是單純的 Script，且有的是要在 Control Plane 跑，有的是要在 Worker Node 跑**。
 
@@ -20,17 +20,17 @@ kubeadm 為**集群整體**的管理工具，用來快速搭建 K8s 集群，它
 
 ### kubectl
 
-kubectl 為**集群內部**的管理工具。和[上一章](/01_kubernetes_introduction/chapter2-component-details.md)介紹的一致，使用者用此指令會直接打到 kube-apiserver。
+kubectl 為**集群內部**的管理工具。和[上一章](/01_kubernetes_introduction/chapter1-2-component-details.md)介紹的一致，使用者用此指令會直接打到 kube-apiserver。
 
 而 kube-apiserver 就是作為整個集群的資訊中心，大部分元件都會監聽此元件，並且也是對 etcd 的唯一窗口，因此可以做**集群內部**的管控。
 
 比如創建、查看、更新、刪除 Pods、Services、Deployments 等資源。
 
-若不熟悉集群內部操作，可以看[上一章](/01_kubernetes_introduction/chapter2-component-details.md)的介紹。
+若不熟悉集群內部操作，可以看[上一章](/01_kubernetes_introduction/chapter1-2-component-details.md)的介紹。
 
 ### kubelet
 
-kubelet 為 **Worker Node 的管理工具**。一樣在[上一章](/01_kubernetes_introduction/chapter2-component-details.md)有介紹。
+kubelet 為 **Worker Node 的管理工具**。一樣在[上一章](/01_kubernetes_introduction/chapter1-2-component-details.md)有介紹。
 
 kubelet 是每個 Worker Node 都有的元件，主要會監聽 kube-apiserver，並且對自己的 Node 進行管控。
 
@@ -118,7 +118,7 @@ sudo sysctl --system
 
 ### Container Runtime Installation
 
-開始正式安裝 [Container Runtime](/01_kubernetes_introduction/chapter2-component-details.md#22-container-runtime)！
+開始正式安裝 [Container Runtime](/01_kubernetes_introduction/chapter1-2-component-details.md#22-container-runtime)！
 
 這裡使用 `containerd` 作為 Container Runtime，詳細介紹可以參考[官方文件](https://github.com/containerd/containerd/blob/main/docs/getting-started.md)。
 
@@ -254,7 +254,7 @@ kubectl get pod -A
 
 #### Network Setup
 
-此時，可以發現大部分名稱都已經在[上一章](/01_kubernetes_introduction/chapter2-component-details.md)介紹過，唯有 `coredns-*` 還沒提到，而這個元件的工作就是 Cluster 內部的 DNS 系統，想像有一個巨大的 Dict（名稱 -> IP），當 Cluster 內部在訪問某個服務 `foo` 時，實際上該流量會先導到 DNS 詢問 `foo` 的 IP 位置，有了 IP 後就透過先前提到的 `iptables` 將這些流量轉發到對應的服務內。
+此時，可以發現大部分名稱都已經在[上一章](/01_kubernetes_introduction/chapter1-2-component-details.md)介紹過，唯有 `coredns-*` 還沒提到，而這個元件的工作就是 Cluster 內部的 DNS 系統，想像有一個巨大的 Dict（名稱 -> IP），當 Cluster 內部在訪問某個服務 `foo` 時，實際上該流量會先導到 DNS 詢問 `foo` 的 IP 位置，有了 IP 後就透過先前提到的 `iptables` 將這些流量轉發到對應的服務內。
 
 而由於 Cluster 只建立好集群的殼，內部網路還沒實作完畢，DNS 系統無法建立成功，因此 `coredns-*` 一直處於 Pending 的狀態。而在 K8s 內部的網路通信，主要依靠 CNI (Container Network Interface) 的規範進行，他負責管理和配置容器 (Pod) 的網絡接口，使得 Pod 能夠在 Cluster 中通信。也就是，**要先有 CNI 提供好的網路基建，把網路建立起來，分配給每個 Pod IP，後續 kube-proxy 才能藉由這個網路基建，動態更新 iptables。** 因此，沒有 CNI，相當於 Cluster 完全不能通信，也建立不起來。
 
@@ -315,6 +315,6 @@ service kubelet status
 ```
 ![alt text](image-12.png)
 
-至此，K8s 集群已經順利啟動成功，未來有新的工作節點要加入的話，把 Container Runtime 和 Command Line Tool 裝好，就可以用同樣的方式加入，呼應[第一章](/01_kubernetes_introduction/chapter1-basic-concept.md)提到的概念，K8s 就是自動化管理 Container 的工具，我們如今已經把環境架好，未來只要透過配置檔，就可以自動把 Container 推送到集群內部執行了，另外如果是需要耗費龐大資源的服務，也可以在基本框架不變下，新增更多 Worker Node 來解決。
+至此，K8s 集群已經順利啟動成功，未來有新的工作節點要加入的話，把 Container Runtime 和 Command Line Tool 裝好，就可以用同樣的方式加入，呼應[第一章](/01_kubernetes_introduction/chapter1-1-basic-concept.md)提到的概念，K8s 就是自動化管理 Container 的工具，我們如今已經把環境架好，未來只要透過配置檔，就可以自動把 Container 推送到集群內部執行了，另外如果是需要耗費龐大資源的服務，也可以在基本框架不變下，新增更多 Worker Node 來解決。
 
 而實際上，要怎麼將服務推送到集群內部，在[下一章](/03_LLM_full_finetune_on_k8s/)會透過 distributed training for LLM 為案例，來介紹要怎麼利用多個 Worker Node，平行化訓練一個龐大的語言模型。

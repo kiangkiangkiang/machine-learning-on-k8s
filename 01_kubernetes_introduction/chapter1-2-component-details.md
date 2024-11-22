@@ -1,6 +1,6 @@
 # K8s Component
 
-有別於[上一章](chapter1-basic-concept.md)從 K8s 應用情境切入介紹，本章將更著重在實際內部元件的概述。包含介紹上一章提到的 Control Plane、Node 等結構中，內部有什麼組成？彼此間資訊如何傳遞？而在了解這些細節後，未來在實作上會更清楚如何建立一個 Control Plane 以及 Node。
+有別於[上一章](chapter1-1-basic-concept.md)從 K8s 應用情境切入介紹，本章將更著重在實際內部元件的概述。包含介紹上一章提到的 Control Plane、Node 等結構中，內部有什麼組成？彼此間資訊如何傳遞？而在了解這些細節後，未來在實作上會更清楚如何建立一個 Control Plane 以及 Node。
 
 以下為基礎 K8s 架構範例（可能會因為不同服務建置需求而有不同），後續將透過此架構圖進一步說明內部細節。
 
