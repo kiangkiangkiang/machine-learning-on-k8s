@@ -1,2 +1,7 @@
 ignore*
 data/*
+kubectl*
+virginia-cluster-config
+easy*
+*.pem
+kubeconfig

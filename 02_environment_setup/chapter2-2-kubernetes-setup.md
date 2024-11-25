@@ -304,7 +304,7 @@ sudo kubeadm join {YOUR_IP}:6443 --token {TOKEN} --discovery-token-ca-cert-hash 
 
 **CONTROL PLANE**
 ```sh
-kubeadm get nodes
+kubectl get nodes
 ```
 ![alt text](image-11.png)
 
@@ -317,4 +317,4 @@ service kubelet status
 
 至此，K8s 集群已經順利啟動成功，未來有新的工作節點要加入的話，把 Container Runtime 和 Command Line Tool 裝好，就可以用同樣的方式加入，呼應[第一章](/01_kubernetes_introduction/chapter1-1-basic-concept.md)提到的概念，K8s 就是自動化管理 Container 的工具，我們如今已經把環境架好，未來只要透過配置檔，就可以自動把 Container 推送到集群內部執行了，另外如果是需要耗費龐大資源的服務，也可以在基本框架不變下，新增更多 Worker Node 來解決。
 
-而實際上，要怎麼將服務推送到集群內部，在[下一章](/03_LLM_full_finetune_on_k8s/)會透過 distributed training for LLM 為案例，來介紹要怎麼利用多個 Worker Node，平行化訓練一個龐大的語言模型。
+而實際上，要怎麼將服務推送到集群內部，在[第三章](/03_LLM_full_finetune_on_k8s/)會透過 distributed training for LLM 為案例，來介紹要怎麼利用多個 Worker Node，平行化訓練一個龐大的語言模型。
