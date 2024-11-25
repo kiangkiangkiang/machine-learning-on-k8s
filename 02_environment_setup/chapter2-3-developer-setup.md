@@ -133,78 +133,39 @@ kubectl apply -f cluster-admin-binding.yaml
 或是想看有沒有綁定成功，可以透過 `kubectl describe clusterrolebinding my-cluster-role-binding` 查看。
 
 
-#### Update Certificate
+#### Build Certificate
+
+到此，Cluster 內已經有一個剛才創建好的角色，名叫 `my-ec2-developer`，但若其他開發者要使用這個角色來跟集群互動，總要有個地方告訴 Cluster 進行身份驗證，而在 Cluster 內，就是透過 kubeconfig 進行身份驗證。
+
+所以接著要建立具有 `my-ec2-developer` 的憑證，後續拿著此憑證的人，都會通過身份驗證進而跟 Cluster 互動。
 
 
+使用 `openssl` 建立一個 key，用於生成後續屬於 `my-ec2-developer` 的認證簽署請求（CSR）
 ```sh
-sudo openssl genrsa -out developer.key 2048
-sudo openssl req -new -key developer.key -out developer.csr -subj "/CN=developer/O=development"
+sudo openssl genrsa -out my-ec2-developer.key 2048
 ```
 
-
+透過此 key，建立認證簽署請求 `my-ec2-developer.csr` 並且這別說明，此 CSR 是在建立一個 Common name =my-ec2-developer 且 Organization = developers 的憑證。
 ```sh
-sudo openssl x509 -req -in developer.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out developer.crt -days 365
+sudo openssl req -new -key my-ec2-developer.key -out my-ec2-developer.csr -subj "/CN=my-ec2-developer/O=developers"
 ```
+透過此指令，後續持有此憑證的用戶訪問 Cluster 時，Cluster 會去 RoleBindings or ClusterRoleBindings 找到名字 `my-ec2-developer` 綁定哪個特定權限，而我們早早設定好 `my-ec2-developer` 會綁定 `my-cluster-admin` 權限，因此後續拿著此憑證，相當於有 Admin 權限。
 
-#### Create Account
-
-
-回到 EC2 中的 Control Plane 那台機器中，
-
-
-
-要先跑開放 public IP
-
-然後 openssl 創建憑證
-
-openssl genrsa -out developer.key 2048
-
-# 用私鑰生成一個憑證簽名請求 (CSR)
-openssl req -new -key developer.key -out developer.csr -subj "/CN=developer/O=developers"
-
-# 使用集群的 CA 來簽署 CSR，以生成一個簽名憑證
-openssl x509 -req -in developer.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out developer.crt -days 365
-
-
-sudo base64 -w 0 /etc/kubernetes/pki/ca.crt 
-
-sudo base64 -w 0 my-ec2-developer.key 
-
-base64 -w 0 my-ec2-developer.crt
-
-
-然後原本的那個憑證要更新這個
-
-最後創建角色
-
-
-
-
-
-
-
-
-
-配置好相關的 kubeconfig，再將此 config 傳給其他開發機上。
-
-第一步，先在集群內辦帳號！有個集群的角色，後續的開發機就以這個角色登入。
-
-手動建立一個 .yaml 檔案，命名為 `build-account.yaml`，內容會在[部署的章節](/03_LLM_full_finetune_on_k8s/chapter3-2-training-llm-on-k8s.md)專門介紹！
-
-```yaml
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: my-developer
-  namespace: default
-```
-
-
-然後推進 Cluster 內：
+最後，將讓集群簽署我們產生好的 CSR 檔案，名叫 `my-ec2-developer.crt`並且保有 365 天時限。
 ```sh
-kubectl apply -f build-account.yaml
+sudo openssl x509 -req -in my-ec2-developer.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out my-ec2-developer.crt -days 365
 ```
-![alt text](image-1.png)
 
-get master ip: kubectl cluster-info
-get cluster ip: kubectl get svc kubernetes
+#### Delivery Certificate
+
+最後，可以參照 [kubeconfig template](kubeconfig.template.yaml) 內的文件，使用以下對應的指令，將對應的產出的值填入：
+- YOUR_DEVELOPER_KEY: `sudo base64 -w 0 my-ec2-developer.key`
+- YOUR_DEVELOPER_CRT: `base64 -w 0 my-ec2-developer.crt`
+- YOUR_CLUSTER_CA_CRT: `sudo base64 -w 0 /etc/kubernetes/pki/ca.crt`
+- YOUR_CLUSTER_NAME: 查看 control plane 內的 .kube/config 會有 Cluster Name。
+填入完後，命名為 `kubeconfig`。
+
+查看是否能正確請求到 Cluster：
+```sh
+kubectl --kubeconfig=kubeconfig get nodes
+```
