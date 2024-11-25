@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ask-time-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ask-time
+  template:
+    metadata:
+      labels:
+        app: ask-time
+    spec:
+      containers:
+      - name: ask-time-app
+        image: YOUR_AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/luka-exp:latest-ask-time
+        ports:
+        - containerPort: 5000
+      imagePullSecrets:
+      - name: ecr-registry
+
+

@@ -163,9 +163,9 @@ sudo openssl x509 -req -in my-ec2-developer.csr -CA /etc/kubernetes/pki/ca.crt -
 - YOUR_DEVELOPER_CRT: `base64 -w 0 my-ec2-developer.crt`
 - YOUR_CLUSTER_CA_CRT: `sudo base64 -w 0 /etc/kubernetes/pki/ca.crt`
 - YOUR_CLUSTER_NAME: 查看 control plane 內的 .kube/config 會有 Cluster Name。
-填入完後，命名為 `kubeconfig`。
+填入完後，命名為 `kubeconfig` 並且把該檔案交到開發機器上。
 
-查看是否能正確請求到 Cluster：
+開發機有了檔案後，在開發機上查看是否能正確請求到 Cluster：
 ```sh
 kubectl --kubeconfig=kubeconfig get nodes
 ```
