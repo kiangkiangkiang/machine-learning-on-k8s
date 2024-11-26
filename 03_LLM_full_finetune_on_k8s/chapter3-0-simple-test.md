@@ -42,5 +42,7 @@ kubectl apply -f service.yaml
 kubectl apply -f service2.yaml
 ```
 
+**注意：先設定環境變數 `export KUBECONFIG=/path/to/your/kubeconfig`，這樣就不用每次 kubectl apply 還要 --kubeconfig。**
+
 好了後，使用 `curl http://YOUR_NODE_PUBLIC_IP:30000/ask_time` 應該就會有時間了，如果回應太久，要去檢查 Security Group 有沒有設定正確，如果 Internal Server Error 通常就是 Service 內部有問題，可以進去 Pod 內看 `kubectl exec -it <pod-name> -- bash` 或是先看看 Log `kubectl logs <pod-name>`。
 

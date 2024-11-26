@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pytorch-fsdp-training
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pytorch-fsdp
+  template:
+    metadata:
+      labels:
+        app: pytorch-fsdp
+    spec:
+      containers:
+      - name: pytorch-container
+        image: ACCOUNTID.dkr.ecr.us-east-1.amazonaws.com/luka-exp:toy-fsdp-v0  # 替換成你的鏡像名
+        resources:
+          limits:
+            nvidia.com/gpu: 1  # 確保使用適當的 GPU requests
+            memory: "10Gi"
+        env:
+        - name: MASTER_PORT
+          value: "12355"
+        - name: WORLD_SIZE
+          value: "2"  # 暫定與副本數相同
+        - name: MASTER_ADDR
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP  # 獲取 Pod 所在 Node 的 IP
+      nodeSelector:
+        kubernetes.io/role: compute  # 只有 compute 角色的節點會被選擇，根據實際需要設置
+      restartPolicy: OnFailure
+      imagePullSecrets:
+      - name: ecr-registry
