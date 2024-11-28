@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ${TRAINING_NAMESPACE}
+  name: ${TRAINING_APP_NAME_1}
+spec:
+  selector:
+    matchLabels:
+      app: ${TRAINING_APP_NAME_1}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ${TRAINING_APP_NAME_1}
+    spec:
+      nodeName: worker-node-1
+      containers:
+        - name: ${TRAINING_APP_NAME_1}
+          image: ${REGISTRY}/${ECR_REPO_FOLDER}:${DOCKER_IMAGE_NAME}
+          env:
+            - name: LOCAL_ADDR
+              value: ${TRAINING_APP_NAME_1}.${TRAINING_NAMESPACE}.svc.cluster.local
+          command:
+                - bash
+                - -c
+                - "${CMD}"
+          resources:
+            limits:
+              memory: 10Gi
+              nvidia.com/gpu: ${GPU_PER_WORKER}
+      imagePullSecrets:
+      - name: ecr-registry2
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ${TRAINING_NAMESPACE}
+  name: ${TRAINING_APP_NAME_1}
+spec:
+  clusterIP: None
+  ports:
+    - name: c10d
+      port: ${RDZV_PORT}
+      protocol: TCP
+  selector:
+    app: ${TRAINING_APP_NAME_1}

@@ -6,3 +6,5 @@ easy*
 *.pem
 kubeconfig
 .env
+training_worker1.yaml
+training_worker2.yaml
