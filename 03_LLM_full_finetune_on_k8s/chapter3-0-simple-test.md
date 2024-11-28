@@ -46,3 +46,73 @@ kubectl apply -f service2.yaml
 
 好了後，使用 `curl http://YOUR_NODE_PUBLIC_IP:30000/ask_time` 應該就會有時間了，如果回應太久，要去檢查 Security Group 有沒有設定正確，如果 Internal Server Error 通常就是 Service 內部有問題，可以進去 Pod 內看 `kubectl exec -it <pod-name> -- bash` 或是先看看 Log `kubectl logs <pod-name>`。
 
+## Kubernetes GPU Setting
+
+在 Kubernetes Framework 中，記得除了宿主機要有 GPU Driver 外，Cluster 也要安裝。參考[這裡](https://kubernetes.io/zh-cn/docs/tasks/manage-gpus/scheduling-gpus/)。
+
+而我目前使用的是 Nvidia T4 的 GPU，所以依照官方指引，可以去 [Nvidia Github](https://github.com/NVIDIA/k8s-device-plugin#quick-start) 看如何安裝對應的套件。
+
+先透過 `dpkg -l 'nvidia*'` 檢查版本號跟官方是否一致。
+
+### Container Runtime (ALL GPU NODEs)
+
+每個不同的 Container Runtime 要做相對應的設定，依照 [Nvidia 提供文件](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#configuring-containerd-for-kubernetes)，針對我們自己的 `Containerd` 做以下設定：
+
+```sh
+sudo nvidia-ctk runtime configure --runtime=containerd
+```
+
+跑完後，系統會自動在 `/etc/containerd/config.toml` 新增 Nvidia 的相關參數配置。
+
+但是重點沒有改預設的 runtime，因此一樣要到 `/etc/containerd/config.toml` 內，手動更改以下參數:
+`default_runtime_name` 原本是 `runc`，針對所有 GPU 機器，請改成 `nvidia`
+```sh
+[plugins."io.containerd.grpc.v1.cri".containerd]
+    default_runtime_name = "nvidia"
+```
+
+最後重啟
+
+```sh
+sudo systemctl restart containerd
+```
+
+### Control Plane Nvidia Plugin
+
+所有節點的 Container Runtime 都設定好後，可以回 Control Plane 為集群安裝 Nvidia Plugin 了。
+
+
+```sh
+kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.17.0/deployments/static/nvidia-device-plugin.yml
+```
+
+之後我們 apply 一個測試案例看看：
+
+```sh
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-pod
+spec:
+  restartPolicy: Never
+  containers:
+    - name: cuda-container
+      image: nvcr.io/nvidia/k8s/cuda-sample:vectoradd-cuda12.5.0
+      resources:
+        limits:
+          nvidia.com/gpu: 1 # requesting 1 GPU
+  tolerations:
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+EOF
+```
+
+然後看看有沒有成功：
+
+```sh
+kubectl logs gpu-pod
+```
+
+![alt text](image-2.png)
