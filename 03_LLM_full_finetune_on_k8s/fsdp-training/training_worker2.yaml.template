@@ -14,22 +14,31 @@ spec:
         app: ${TRAINING_APP_NAME_2}
     spec:
       nodeName: worker-node-2
+      volumes:
+        - name: shmem
+          #emptyDir:
+          #  medium: Memory
+          hostPath: 
+            path: /dev/shm
+        - name: local
+          hostPath:
+            path: /mnt/k8s-disks/0
       containers:
         - name: ${TRAINING_APP_NAME_2}
           image: ${REGISTRY}/${ECR_REPO_FOLDER}:${DOCKER_IMAGE_NAME}
           env:
-            - name: LOCAL_ADDR
-              value: ${TRAINING_APP_NAME_2}.${TRAINING_NAMESPACE}.svc.cluster.local
-            - name: LOGLEVEL
-              value: "DEBUG"
-            - name: TORCH_DISTRIBUTED_DEBUG
-              value: "DETAIL"
-            - name: NCCL_DEBUG
-              value: "DEBUG"
-            - name: TORCH_NCCL_ENABLE_MONITORING
-              value: "1"
-            - name: TORCH_NCCL_DEBUG_INFO_TEMP_FILE
-              value: "/local/nccl_trace_rank_"
+          - name: LOCAL_ADDR
+            value: ${TRAINING_APP_NAME_2}.${TRAINING_NAMESPACE}.svc.cluster.local
+          - name: LOGLEVEL
+            value: "DEBUG"
+          - name: TORCH_DISTRIBUTED_DEBUG
+            value: "DETAIL"
+          - name: NCCL_DEBUG
+            value: "DEBUG"
+          - name: TORCH_NCCL_ENABLE_MONITORING
+            value: "1"
+          - name: TORCH_NCCL_DEBUG_INFO_TEMP_FILE
+            value: "/local/nccl_trace_rank_"
           command:
                 - bash
                 - -c
@@ -37,6 +46,11 @@ spec:
           resources:
             limits:
               nvidia.com/gpu: ${GPU_PER_WORKER}
+          volumeMounts:
+            - name: shmem
+              mountPath: /dev/shm
+            - name: local
+              mountPath: /local
       imagePullSecrets:
       - name: ${IMAGE_PULL_SECET}
 
