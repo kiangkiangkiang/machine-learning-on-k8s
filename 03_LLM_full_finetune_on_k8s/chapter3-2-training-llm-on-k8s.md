@@ -65,7 +65,6 @@ torchrun，是 pytorch 進行分散式訓練的進入點，他提供環境配置
 
 #### Note
 
-**訓練過程值得注意的：**
 1. 如果有 warning 說沒辦法通過某個 port 打到 c10d，例如什麼 ... The IPv6 network addresses of ...，可能是因為 c10d 還沒完全啟動後，我們的服務就先跑，可以透過以下方式檢查：
    1. `kubectl exec -it <pod name> -- bash` # 進去 pod 內看看
    2. `nc -zv <rdzv-host> <port>` 打到 c10d 在的位置，看網路是否通。
