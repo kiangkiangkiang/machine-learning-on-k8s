@@ -29,7 +29,7 @@ spec:
               memory: 10Gi
               nvidia.com/gpu: ${GPU_PER_WORKER}
       imagePullSecrets:
-      - name: ecr-registry2
+      - name: ${IMAGE_PULL_SECET}
 
 ---
 

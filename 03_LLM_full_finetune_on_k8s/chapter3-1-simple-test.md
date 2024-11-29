@@ -16,13 +16,15 @@
 
 ```sh
 aws ecr get-login-password --region us-east-1 | \
-kubectl create secret docker-registry ecr-registry \
+kubectl create secret docker-registry ecr-registry -n YOUR_NAMESPACE\
 --docker-server=YOUR_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com \
 --docker-username=AWS \
 --docker-password=$(cat -) 
 ```
 
 在這裡我們創造一個名叫 `ecr-registry` 的 Secrets，之後就可以寫入 yaml 內。
+
+**注意：-n YOUR_NAMESPACE 可以不需要，不放就是預設 `default`，但要記得，`kubectl apply` 時若你的 yaml 有設特定的 namespace，那要確保該 namespace 底下有這個 key。**
 
 ## ECR
 

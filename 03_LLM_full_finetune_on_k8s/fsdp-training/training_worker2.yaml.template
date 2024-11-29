@@ -13,7 +13,7 @@ spec:
       labels:
         app: ${TRAINING_APP_NAME_2}
     spec:
-      nodeName: worker-node-1
+      nodeName: worker-node-2
       containers:
         - name: ${TRAINING_APP_NAME_2}
           image: ${REGISTRY}/${ECR_REPO_FOLDER}:${DOCKER_IMAGE_NAME}
@@ -29,7 +29,7 @@ spec:
               memory: 10Gi
               nvidia.com/gpu: ${GPU_PER_WORKER}
       imagePullSecrets:
-      - name: ecr-registry2
+      - name: ${IMAGE_PULL_SECET}
 
 ---
 
