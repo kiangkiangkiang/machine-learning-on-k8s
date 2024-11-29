@@ -20,13 +20,22 @@ spec:
           env:
             - name: LOCAL_ADDR
               value: ${TRAINING_APP_NAME_1}.${TRAINING_NAMESPACE}.svc.cluster.local
+            - name: LOGLEVEL
+              value: "DEBUG"
+            - name: TORCH_DISTRIBUTED_DEBUG
+              value: "DETAIL"
+            - name: NCCL_DEBUG
+              value: "DEBUG"
+            - name: TORCH_NCCL_ENABLE_MONITORING
+              value: "1"
+            - name: TORCH_NCCL_DEBUG_INFO_TEMP_FILE
+              value: "/local/nccl_trace_rank_"
           command:
                 - bash
                 - -c
                 - "${CMD}"
           resources:
             limits:
-              memory: 10Gi
               nvidia.com/gpu: ${GPU_PER_WORKER}
       imagePullSecrets:
       - name: ${IMAGE_PULL_SECET}

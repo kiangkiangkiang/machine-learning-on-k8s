@@ -61,3 +61,13 @@ torchrun，是 pytorch 進行分散式訓練的進入點，他提供環境配置
 
 若有微調的參數要調整，可以在 `.env.template` 內的 `CMD` 變數修改新增。例如有自己的資料，可以在 `CMD` 內指定資料集。
 
+
+
+#### Note
+
+**訓練過程值得注意的：**
+1. 如果有 warning 說沒辦法通過某個 port 打到 c10d，例如什麼 ... The IPv6 network addresses of ...，可能是因為 c10d 還沒完全啟動後，我們的服務就先跑，可以透過以下方式檢查：
+   1. `kubectl exec -it <pod name> -- bash` # 進去 pod 內看看
+   2. `nc -zv <rdzv-host> <port>` 打到 c10d 在的位置，看網路是否通。
+
+2. 初始化的時候，會有很多 `from torch.distributed._shard.checkpoint import`，就是機器開始對每顆 GPU Setup 環境，理論上有幾顆 GPU 就會有幾行上述的指令。
