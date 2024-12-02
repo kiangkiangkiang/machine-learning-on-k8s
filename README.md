@@ -6,6 +6,7 @@ This repository provides guides and examples for setting up Kubernetes and deplo
 
 It is structured to facilitate easy understanding and implementation even for those new to specific technologies.
 
+**Note: In a real production environment, please use AWS EKS to build clusters. This article uses EC2 solely for demonstrating the setup process.**
 
 ### Introduction
 
@@ -21,6 +22,7 @@ Before you begin, ensure you have the following:
 - **Basic Docker Knowledge**: Understanding Docker images, containers, and network.
 - **AWS Basics**: Some familiarity with AWS services is beneficial, although not required.
 - **Machine Learning Knowledge**: Transformers. Training Step. Fowrward/Backward Concepts.
+
 
 ## Folder Structure
 
