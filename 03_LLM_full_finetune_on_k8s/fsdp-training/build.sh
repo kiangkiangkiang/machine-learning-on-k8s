@@ -11,11 +11,11 @@ docker push ${REGISTRY}/${ECR_REPO_FOLDER}:${DOCKER_IMAGE_NAME}
 envsubst < training_worker1.yaml.template > training_worker1.yaml
 envsubst < training_worker2.yaml.template > training_worker2.yaml
 
-cat <<EOF > namespace.yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: ${TRAINING_NAMESPACE}
-EOF
+# cat <<EOF > namespace.yaml
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: ${TRAINING_NAMESPACE}
+# EOF
 
-kubectl apply -f namespace.yaml
+# kubectl apply -f namespace.yaml

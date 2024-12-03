@@ -46,6 +46,9 @@ spec:
           resources:
             limits:
               nvidia.com/gpu: ${GPU_PER_WORKER}
+            requests:
+              memory: 16Gi
+              nvidia.com/gpu: ${GPU_PER_WORKER}
           volumeMounts:
             - name: shmem
               mountPath: /dev/shm

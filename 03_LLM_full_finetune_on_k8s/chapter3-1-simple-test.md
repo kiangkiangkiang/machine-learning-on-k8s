@@ -118,3 +118,4 @@ kubectl logs gpu-pod
 ```
 
 ![alt text](image-2.png)
+
