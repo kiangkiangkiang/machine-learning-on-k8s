@@ -2,7 +2,7 @@
 
 Welcome to the Distributed LLM (Large Language Model) Training on Kubernetes project! 
 
-This repository provides guides and examples for setting up Kubernetes and deploying distributed LLM training workflows (**mostly in chinese**). 
+This repository provides guides and examples for setting up Kubernetes and deploying distributed LLM training workflows with multi-nodes and multi-gpu. (**mostly in chinese**). 
 
 It is structured to facilitate easy understanding and implementation even for those new to specific technologies.
 
